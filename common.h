@@ -13,9 +13,6 @@
 
 using namespace std;
 
-#define TWOKTIMESTAMP 946684800
-//#define TWOKTIMESTAMP 0
-
 /* Command and response IDs */
 #define OBC_SU_ON 		0xF1
 #define OBC_SU_OFF 		0xF2
@@ -71,7 +68,9 @@ typedef struct  __attribute__ ((__packed__)) mnlp_script_sequence_s{
 	uint8_t param[254];
 }mnlp_script_sequence_t;
 
-uint16_t Fletcher16( uint8_t* data, int count );
+uint16_t SlowFletcher16( uint8_t* data, int count );
+uint16_t fletcher16( uint8_t const *data, size_t bytes );
+int AdjustFletcher2Zero(uint8_t *buffer, size_t n);
 string getStrDate(time_t timestamp);
 time_t getTimeByString(string timestr);
 time_t get2Ktime();

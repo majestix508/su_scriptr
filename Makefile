@@ -1,6 +1,6 @@
 
 CC=g++
-CFLAGS=-I.
+CFLAGS= -g -I.
 
 CPPFLAGS=$(CFLAGS)
 

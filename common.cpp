@@ -1,6 +1,6 @@
 #include "common.h"
 
-uint16_t Fletcher16( uint8_t* data, int count ) {
+uint16_t SlowFletcher16( uint8_t* data, int count ) {
 	uint16_t sum1 = 0;
 	uint16_t sum2 = 0;
 	int index;
@@ -27,6 +27,65 @@ c1 = 0xff - (( f0 + c0 ) % 0xff);
 Where length is the length in bytes of the data input (script)
 before the c0 and c1 are added.
 */
+
+uint16_t fletcher16( uint8_t const *data, size_t bytes )
+{
+        uint16_t sum1 = 0xff, sum2 = 0xff;
+ 
+        while (bytes) {
+                size_t tlen = bytes > 20 ? 20 : bytes;
+                bytes -= tlen;
+                do {
+                        sum2 += sum1 += *data++;
+                } while (--tlen);
+                sum1 = (sum1 & 0xff) + (sum1 >> 8);
+                sum2 = (sum2 & 0xff) + (sum2 >> 8);
+        }
+        /* Second reduction step to reduce sums to 8 bits */
+        sum1 = (sum1 & 0xff) + (sum1 >> 8);
+        sum2 = (sum2 & 0xff) + (sum2 >> 8);
+        return sum2 << 8 | sum1;
+}
+
+// int AdjustFletcher2Zero()
+//
+// Add two bytes to give the fletcher checksum a return value of zero
+//         
+// The function returns with the final Fletcher16 checksum, (it ought to be 0).
+
+int AdjustFletcher2Zero(uint8_t *buffer, size_t n)
+{
+    uint16_t u16;
+    uint16_t u17;
+    unsigned char c0;
+    unsigned char c1;
+    unsigned char cb0;
+    unsigned char cb1;
+    int retval;
+
+    retval = 9999;
+
+    u16 = SlowFletcher16(buffer, n);
+
+    // calculate the two bytes to be added 
+    
+    c0 =  (u16 & 0x00FF);
+    c1 = ((u16 & 0xFF00) >> 8);
+    
+    cb0 = 255 - ((c0+c1) % 255);
+    cb1 = 255 - ((c0 + cb0) % 255);
+
+    // add the two bytes
+     
+    buffer[n] = cb0;    n++;
+    buffer[n] = cb1;    n++;
+
+    u17 = SlowFletcher16(buffer, n);
+
+    retval = (int)(u17);
+
+    return(retval); 
+}
 
 time_t get2Ktime(){
 	time_t now = time(NULL);

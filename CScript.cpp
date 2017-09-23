@@ -85,8 +85,62 @@ void CScript::PrintJSON()
 	//TODO
 }
 
-void CScript::CreateChecksumFromMember()
+void CScript::ParseJSON(char *filename)
 {
+	JSON_Value *jval = json_parse_file(filename);
+	if (jval==NULL){
+		printf("Error parsing JSON file\n");
+		return;
+	}
+	int script_size=0;
+
+	JSON_Object *root_obj = json_value_get_object (jval);
+	m_header.t_starttime = (uint32_t)getTimeByString(json_object_dotget_string(root_obj, "header.starttime"));
+	m_header.file_sn = (uint32_t)atoi(json_object_dotget_string(root_obj, "header.file_sn"));
+	m_header.sw_ver = (uint8_t)json_object_dotget_number(root_obj, "header.sw_ver");
+    m_header.script_type = (uint8_t)json_object_dotget_number(root_obj, "header.script_type");
+
+    script_size=sizeof(mnlp_script_header_t);
+
+    JSON_Array  *l_tt = json_object_get_array(root_obj,"timetable");
+    for (int i = 0; i < json_array_get_count(l_tt); i++) {
+        JSON_Object *stt = json_array_get_object(l_tt, i);
+        mnlp_times_table_t l_tstr;
+        l_tstr.seconds = json_object_dotget_number(stt, "second");
+        l_tstr.minutes = json_object_dotget_number(stt, "minute");
+        l_tstr.hours = json_object_dotget_number(stt, "hour");
+        l_tstr.script_index = (uint8_t)strtol(json_object_dotget_string(stt, "script_index"), NULL, 16);
+        this->m_timetable.push_back(l_tstr);
+        script_size+=sizeof(mnlp_times_table_t);
+    }
+
+    JSON_Array  *l_sq = json_object_get_array(root_obj,"sequences");
+    for (int i = 0; i < json_array_get_count(l_sq); i++) {
+        JSON_Object *stt = json_array_get_object(l_sq, i);
+        mnlp_script_sequence_t l_tec;
+        l_tec.deltaTIME_sec = (uint8_t)json_object_dotget_number(stt, "deltaTIME_seconds");
+        l_tec.deltaTIME_min= (uint8_t)json_object_dotget_number(stt, "deltaTIME_minutes");
+        l_tec.cmd_id = (uint8_t)strtol(json_object_dotget_string(stt, "cmd_id"),NULL,16);
+        l_tec.length = (uint8_t)json_object_dotget_number(stt, "length");
+        l_tec.seq_cnt = (uint8_t)json_object_dotget_number(stt, "seq_cnt");
+        
+        script_size+=5;
+
+        string l_params = json_object_dotget_string(stt, "params");
+        vector<string> token = split(json_object_dotget_string(stt, "params")," ");
+        vector<string>::iterator l_Iter = token.begin();
+        uint8_t *p = l_tec.param;
+        while(l_Iter != token.end()){
+            *p = (uint8_t)strtol((*l_Iter).c_str(),NULL,16);
+            p++;
+        	l_Iter++;
+        }
+        this->m_seq.push_back(l_tec);
+        script_size+=token.size();
+    }
+    m_header.script_length=script_size+2;//checksum!!
+
+    //Create m_buffer and m_fsize
     char *buffer = (char*)malloc(m_header.script_length);
     memset(buffer,0,m_header.script_length);
     char *p = buffer;
@@ -128,108 +182,17 @@ void CScript::CreateChecksumFromMember()
     this->m_buffer = buffer;
     this->m_fsize = m_header.script_length-2;
     
-    this->CreateChecksum();
+    m_buffer = (char *)realloc(m_buffer,m_fsize+2);
+    AdjustFletcher2Zero((uint8_t *)m_buffer,(size_t)m_fsize);
+    m_fsize+=2;
+    m_c0 = m_buffer[m_fsize-2];
+    m_c1 = m_buffer[m_fsize-1];
+    m_hasChecksum = true;
 
-    *p = m_c0;
-    p++;
-    *p = m_c1;
-
-    this->m_hasChecksum=true;
-    this->m_buffer = buffer;
-    this->m_fsize = m_header.script_length;
-
-}
-
-void CScript::ParseJSON(char *filename)
-{
-	JSON_Value *jval = json_parse_file(filename);
-	if (jval==NULL){
-		printf("Error parsing JSON file\n");
-		return;
-	}
-	int script_size=0;
-
-	JSON_Object *root_obj = json_value_get_object (jval);
-	//printf("starttime:%s\n",json_object_dotget_string(root_obj, "header.starttime"));
-	//printf("starttime_ts:%d\n",(int)getTimeByString(json_object_dotget_string(root_obj, "header.starttime")));
-	m_header.t_starttime = (uint32_t)getTimeByString(json_object_dotget_string(root_obj, "header.starttime"));
-
-	//printf("file_sn:%s\n",json_object_dotget_string(root_obj, "header.file_sn"));
-	m_header.file_sn = (uint32_t)atoi(json_object_dotget_string(root_obj, "header.file_sn"));
-
-	//printf("sw_ver:%d\n",(int)json_object_dotget_number(root_obj, "header.sw_ver"));
-	m_header.sw_ver = (uint8_t)json_object_dotget_number(root_obj, "header.sw_ver");
-
-	//printf("script_type:%d\n",(int)json_object_dotget_number(root_obj, "header.script_type"));
-    m_header.script_type = (uint8_t)json_object_dotget_number(root_obj, "header.script_type");
-
-    script_size=sizeof(mnlp_script_header_t);
-
-    JSON_Array  *l_tt = json_object_get_array(root_obj,"timetable");
-    for (int i = 0; i < json_array_get_count(l_tt); i++) {
-        JSON_Object *stt = json_array_get_object(l_tt, i);
-        mnlp_times_table_t l_tstr;
-        //printf("---%d\n",i);
-        //printf("second:%d\n",(int)json_object_dotget_number(stt, "second"));
-        l_tstr.seconds = json_object_dotget_number(stt, "second");
-
-        //printf("minute:%d\n",(int)json_object_dotget_number(stt, "minute"));
-        l_tstr.minutes = json_object_dotget_number(stt, "minute");
-        
-        //printf("hour:%d\n",(int)json_object_dotget_number(stt, "hour"));
-        l_tstr.hours = json_object_dotget_number(stt, "hour");
-
-        //printf("script_index:%s\n",json_object_dotget_string(stt, "script_index"));
-        l_tstr.script_index = (uint8_t)strtol(json_object_dotget_string(stt, "script_index"), NULL, 16);
-        this->m_timetable.push_back(l_tstr);
-        script_size+=sizeof(mnlp_times_table_t);
-    }
-
-    JSON_Array  *l_sq = json_object_get_array(root_obj,"sequences");
-    for (int i = 0; i < json_array_get_count(l_sq); i++) {
-        JSON_Object *stt = json_array_get_object(l_sq, i);
-        mnlp_script_sequence_t l_tec;
-
-        //printf("---%d\n",i);
-        //printf("deltaTIME_seconds:%d\n",(int)json_object_dotget_number(stt, "deltaTIME_seconds"));
-        l_tec.deltaTIME_sec = (uint8_t)json_object_dotget_number(stt, "deltaTIME_seconds");
-
-        //printf("deltaTIME_minutes:%d\n",(int)json_object_dotget_number(stt, "deltaTIME_minutes"));  
-        l_tec.deltaTIME_min= (uint8_t)json_object_dotget_number(stt, "deltaTIME_minutes");
-
-        //printf("cmd_id:%s\n",json_object_dotget_string(stt, "cmd_id"));
-        l_tec.cmd_id = (uint8_t)strtol(json_object_dotget_string(stt, "cmd_id"),NULL,16);
-
-        //printf("length:%d\n",(int)json_object_dotget_number(stt, "length"));
-        l_tec.length = (uint8_t)json_object_dotget_number(stt, "length");
-
-        //printf("seq_cnt:%d\n",(int)json_object_dotget_number(stt, "seq_cnt"));
-        l_tec.seq_cnt = (uint8_t)json_object_dotget_number(stt, "seq_cnt");
-        
-        script_size+=5;
-
-        //printf("params:%s\n",json_object_dotget_string(stt, "params"));
-        string l_params = json_object_dotget_string(stt, "params");
-        vector<string> token = split(json_object_dotget_string(stt, "params")," ");
-        vector<string>::iterator l_Iter = token.begin();
-        uint8_t *p = l_tec.param;
-        while(l_Iter != token.end()){
-            *p = (uint8_t)strtol((*l_Iter).c_str(),NULL,16);
-            p++;
-        	l_Iter++;
-        }
-        this->m_seq.push_back(l_tec);
-        script_size+=token.size();
-    }
-    m_header.script_length=script_size+2;//checksum!!
-
-    this->CreateChecksumFromMember();
-    //this->Print();
 }
 
 void CScript::ParseSU(char *filename)
 {
-	//Read the file
 	FILE *f = fopen(filename, "rb");
 	if (f==NULL){
 		printf("Can't open file %s\n",filename);
@@ -248,22 +211,12 @@ void CScript::ParseSU(char *filename)
     char *p = m_buffer;
 	memcpy(&m_header,p,sizeof(mnlp_script_header_t));
 
-    //printf("head script_length %d filesize %d\n",m_header.script_length, (int)fsize);
-    //printf("head t_starttime %d\n",m_header.t_starttime);
-    //printf("head file_sn %d\n",m_header.file_sn);
-    //printf("head sw_ver %d\n",m_header.sw_ver);
-    //printf("head script_type %d\n",m_header.script_type);
-	
-    
 	p+=sizeof(mnlp_script_header_t);
 	remaining -=sizeof(mnlp_script_header_t);
 
     while(true){
         mnlp_times_table_t ttable;
-
         memcpy(&ttable,p, sizeof(mnlp_times_table_t));
-        
-        //printf("ttable %02d:%02d:%02d - %x\n",ttable.hours, ttable.minutes, ttable.seconds, ttable.script_index);
         
         m_timetable.push_back(ttable);
 
@@ -297,32 +250,24 @@ void CScript::ParseSU(char *filename)
 		    remaining-=seq.length-1;
 	    }
 
-	    //printf("seq %02d:%02d %x %d %d\n",seq.deltaTIME_min, seq.deltaTIME_sec, seq.cmd_id, seq.length, seq.seq_cnt);
 	    m_seq.push_back(seq);
-	    //printf("remaining %d\n",remaining);
 	    if(remaining <=2)
 	       break;
     }
 
     if (remaining==2){ //there's a checksum
-        //printf("Checksum from file: 0x%02x 0x%02x\n",(uint8_t)*p,(uint8_t)*(++p));
         m_c0 = (uint8_t)*p;
         m_c1 = (uint8_t)*(++p);
         m_hasChecksum=true;
-        //this->CreateChecksum();
     }
-/*
-    uint16_t csum1,csum2;
-	uint8_t c0,c1,f0,f1;
-	csum1 = Fletcher16( (uint8_t*)m_buffer, (int)m_fsize);
-	csum2 = Fletcher16( (uint8_t*)m_buffer, (int)m_fsize-2);
-	f0 = csum2 & 0xff;
-	f1 = (csum2 >> 8) & 0xff;
-	c0 = 0xff - (( f0 + f1) % 0xff);
-	c1 = 0xff - (( f0 + c0 ) % 0xff);
-    printf("checksum check (should be 0) %d\n",csum1); //should be 0 if its the right one!
-    printf("recalculated checksum 0x%02x 0x%02x\n",c1,c0);
-*/
+    else {
+        m_buffer = (char *)realloc(m_buffer,m_fsize+2);
+        AdjustFletcher2Zero((uint8_t *)m_buffer,(size_t)m_fsize);
+        m_fsize+=2;
+        m_c0 = m_buffer[m_fsize-2];
+        m_c1 = m_buffer[m_fsize-1];
+        m_hasChecksum = true;
+     }
 }
 
 bool CScript::CheckChecksum()
@@ -331,7 +276,7 @@ bool CScript::CheckChecksum()
 		this->CreateChecksum();
 
     uint16_t csum1;
-	csum1 = Fletcher16( (uint8_t*)m_buffer, (int)m_fsize);
+	csum1 = SlowFletcher16( (uint8_t*)m_buffer, (int)m_fsize);
     if (csum1==0)
     	return true;
 
@@ -350,7 +295,7 @@ void CScript::CreateChecksum()
 
     uint16_t csum;
 	uint8_t c0,c1,f0,f1;
-	csum = Fletcher16( (uint8_t*)m_buffer, size);
+	csum = fletcher16( (uint8_t*)m_buffer, size);
 	f0 = csum & 0xff;
 	f1 = (csum >> 8) & 0xff;
 	m_c1 = 0xff - (( f0 + f1) % 0xff);
@@ -361,8 +306,6 @@ void CScript::CreateChecksum()
 bool CScript::HasChecksum()
 {
 	if (m_hasChecksum)
-	{
 		return true;
-	}
 	return false;
 }

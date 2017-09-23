@@ -31,7 +31,6 @@ public:
     
     void WriteToFile(char* filename);
     void PrintJSON();
-    void CreateChecksumFromMember();
 
 	mnlp_script_header_t m_header;
 	
