@@ -1,0 +1,19 @@
+Script_LEN:
+002F
+Script_HDR:
+C005FF1C
+01000000
+4144
+TimeTable:
+12 06 00            S1
+                    EOT
+ScriptSequences:
+S1:
+00 0A OBC_SU_ON    01 01
+00 0A SU_HC        01 02
+00 0A SU_HC        01 03
+00 0A OBC_SU_OFF   01 04
+00 0A OBC_EOT      01 05
+XSUM:
+32
+44

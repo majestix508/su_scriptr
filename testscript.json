@@ -1,0 +1,65 @@
+{
+	"header":{
+		"starttime": "2015-06-01 12:00:00",
+		"file_sn": "1",
+		"sw_ver": 65,
+		"script_type": 68
+	},
+	"timetable":[
+		{
+			"second":0,
+			"minute":6,
+			"hour":12,
+			"script_index":"41"
+		},
+		{
+			"second":0,
+			"minute":7,
+			"hour":12,
+			"script_index":"55"
+		}
+
+	],
+	"sequences":[
+		{
+			"deltaTIME_seconds":10,
+			"deltaTIME_minutes":0,
+			"cmd_id":"F1",
+			"length":1,
+			"seq_cnt":1,
+			"params":""
+		},
+		{
+			"deltaTIME_seconds":10,
+			"deltaTIME_minutes":0,
+			"cmd_id":"06",
+			"length":1,
+			"seq_cnt":2,
+			"params":""
+		},
+		{
+			"deltaTIME_seconds":10,
+			"deltaTIME_minutes":0,
+			"cmd_id":"06",
+			"length":1,
+			"seq_cnt":3,
+			"params":""
+		},
+		{
+			"deltaTIME_seconds":10,
+			"deltaTIME_minutes":0,
+			"cmd_id":"F2",
+			"length":1,
+			"seq_cnt":4,
+			"params":""
+		},
+		{
+			"deltaTIME_seconds":10,
+			"deltaTIME_minutes":0,
+			"cmd_id":"FE",
+			"length":1,
+			"seq_cnt":5,
+			"params":""
+		}
+	]
+}
