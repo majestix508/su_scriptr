@@ -82,7 +82,98 @@ void CScript::WriteToFile(char* filename)
 
 void CScript::PrintJSON()
 {
-	//TODO
+	string json;
+
+    json = "{\n"; //start
+
+	//Print Header
+    json +="  \"header\":{\n";
+    json +="    \"starttime\": \""+getStrDate(m_header.t_starttime)+"\",\n";
+    stringstream fsn;
+    fsn << (int)m_header.file_sn;
+    json +="    \"filesn\": \""+fsn.str()+"\",\n";
+    stringstream sv;
+    sv << (int)m_header.sw_ver;
+    json +="    \"sw_ver\": "+sv.str()+",\n";
+    stringstream st;
+    st << (int)m_header.script_type;
+    json +="    \"script_type\": "+st.str()+"\n";
+    json +="  },\n";
+
+    //Print timetable
+    json +="  \"timetable\":[";
+    
+    vector<mnlp_times_table_t>::iterator l_Iter = m_timetable.begin();
+    bool first=true;
+    while(l_Iter!=m_timetable.end()){
+        if (!first)
+        	json +=",\n";
+        json +="    {\n";
+        stringstream sec;
+        sec << (int)l_Iter->seconds;
+        json +="        \"second\": "+sec.str()+",\n";
+        stringstream min;
+        min << (int)l_Iter->minutes;
+        json +="        \"minute\": "+min.str()+",\n";
+        stringstream hr;
+        hr<< (int)l_Iter->hours;
+        json +="        \"hour\": "+hr.str()+",\n";
+        stringstream scr;
+        scr << hex << setfill('0') << setw(2) << (int)l_Iter->script_index;
+        json +="        \"script_index\": \""+scr.str()+"\"\n";
+        json +="    }";
+
+        first=false;
+    	l_Iter++;
+    }
+    json +="\n  ],\n";
+
+    //Print Sequences
+    json +="  \"sequences\":[\n";
+    
+    vector<mnlp_script_sequence_t>::iterator l_It= m_seq.begin();
+    first=true;
+    while(l_It != m_seq.end()){
+        if (!first)
+        	json +=",\n";
+        json +="    {\n";
+        
+        stringstream ssec;
+        ssec << (int)l_It->deltaTIME_sec;
+        json +="        \"deltaTIME_seconds\":"+ssec.str()+",\n";
+        stringstream smin;
+        smin << (int)l_It->deltaTIME_min;
+        json +="        \"deltaTIME_minutes\":"+smin.str()+",\n";
+    	stringstream cmd;
+    	cmd << hex << setfill('0') << setw(2) << (int)l_It->cmd_id;
+    	json +="        \"cmd_id\": \""+cmd.str()+"\",\n";
+        stringstream lng;
+        lng << (int)l_It->length;
+        json +="        \"length\": "+lng.str()+",\n";
+        stringstream sc;
+        sc << (int)l_It->seq_cnt;
+        json +="        \"seq_cnt\": "+sc.str()+",\n";
+
+        stringstream params;
+        bool f2=true;
+        for(int i=0; i<l_It->length-1;i++){
+            if(!f2){
+            	params << " ";
+            }
+            params << hex << setfill('0') << setw(2) << (int)l_It->param[i];
+            f2=false;
+        }
+        json +="        \"params\": \""+params.str()+"\"\n";
+
+        json +="    }";
+        first=false;
+    	l_It++;
+    }
+
+    json +="\n  ]\n";
+
+	json += "}\n"; //end
+    cout << json;
 }
 
 void CScript::ParseJSON(char *filename)

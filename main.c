@@ -32,12 +32,13 @@ int main(int argc, char** argv){
 	int cflag = 0;
 	int fflag = 0;
 	int pflag = 0;
+	int xflag = 0;
 	string s_val, j_val, o_val;
 	int c;
 
 	opterr = 0;
 
-    while( (c = getopt (argc, argv, "s:j:o:cfp")) != -1)
+    while( (c = getopt (argc, argv, "s:j:o:cfpx")) != -1)
     {
     	switch (c)
     	{
@@ -59,6 +60,9 @@ int main(int argc, char** argv){
     		case 'p':
     		    pflag = 1;
     		    break;
+    		case 'x':
+    		    xflag = 1;
+    		    break;
     		case '?':
     		    if (optopt == 's' || optopt == 'j' || optopt == 'o')
     			    fprintf(stderr, "Option -%c requires an argument.\n", optopt);
@@ -79,7 +83,7 @@ int main(int argc, char** argv){
     	return 1;
     }
     
-    if (o_val.empty() && (cflag==0 && fflag==0 && pflag==0)){
+    if (o_val.empty() && (cflag==0 && fflag==0 && pflag==0 && xflag==0)){
         printf("Please provide a flag or a outputfile\n\n");
         printHelp();
     	return 1;
@@ -117,6 +121,10 @@ int main(int argc, char** argv){
 
     if (pflag){
     	l_script.Print();
+    }
+
+    if (xflag){
+    	l_script.PrintJSON();
     }
 
     return 0;

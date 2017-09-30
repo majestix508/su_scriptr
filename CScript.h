@@ -9,7 +9,9 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <string.h>
-
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 #include "common.h"
 
 using namespace std;
