@@ -80,7 +80,7 @@ void CScript::WriteToFile(char* filename)
     fclose(f);
 }
 
-void CScript::PrintJSON()
+string CScript::PrintJSON()
 {
 	string json;
 
@@ -173,12 +173,31 @@ void CScript::PrintJSON()
     json +="\n  ]\n";
 
 	json += "}\n"; //end
-    cout << json;
+    return json;
 }
 
-void CScript::ParseJSON(char *filename)
+void CScript::ParseJSONFile(char *filename)
 {
-	JSON_Value *jval = json_parse_file(filename);
+    FILE *f = fopen(filename, "rb");
+    if (f==NULL){
+        printf("Can't open file %s\n",filename);
+        return;
+    }
+    fseek(f, 0, SEEK_END);
+    long l_fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    char *l_buffer = (char *)malloc(l_fsize+1);
+    fread(l_buffer, m_fsize, 1, f);
+    fclose(f);
+    l_buffer[l_fsize]='\0';
+    this->ParseJSON(l_buffer);
+}
+
+void CScript::ParseJSON(char *jsonstring)
+{   
+    JSON_Value *jval = json_parse_string(jsonstring);
+	//JSON_Value *jval = json_parse_file(filename);
 	if (jval==NULL){
 		printf("Error parsing JSON file\n");
 		return;
@@ -282,21 +301,28 @@ void CScript::ParseJSON(char *filename)
 
 }
 
-void CScript::ParseSU(char *filename)
+void CScript::ParseSUFile(char *filename)
 {
-	FILE *f = fopen(filename, "rb");
-	if (f==NULL){
-		printf("Can't open file %s\n",filename);
-		return;
-	}
-	fseek(f, 0, SEEK_END);
-	m_fsize = ftell(f);
-	fseek(f, 0, SEEK_SET);
+    FILE *f = fopen(filename, "rb");
+    if (f==NULL){
+        printf("Can't open file %s\n",filename);
+        return;
+    }
+    fseek(f, 0, SEEK_END);
+    long l_fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
 
-	m_buffer = (char *)malloc(m_fsize);
-	fread(m_buffer, m_fsize, 1, f);
-	fclose(f);
-    
+    char *l_buffer = (char *)malloc(l_fsize);
+    fread(l_buffer, m_fsize, 1, f);
+    fclose(f);
+    this->ParseSU(l_buffer,l_fsize);
+}
+
+void CScript::ParseSU(char *buffer, long size)
+{
+    m_buffer = buffer;
+    m_fsize = size;
+
     int remaining = (int)m_fsize;
 
     char *p = m_buffer;

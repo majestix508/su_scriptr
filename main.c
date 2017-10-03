@@ -20,6 +20,7 @@ void printHelp() {
 	printf("-s [filename]           Parse a SU File\n");
 	printf("-j [filename]           Parse a JSON File\n");
 	printf("-o [filename]           Output filename\n");
+	printf("-x                      Print JSON to stdout\n");
 	printf("-p                      Print the content of the script to stdout\n");
 	printf("-c                      Check  the Fletcher Checksum for the script provided with -s or -j\n");
 	printf("-f                      Create the Fletcher checksum for the script provided with -s or -j\n");
@@ -92,11 +93,11 @@ int main(int argc, char** argv){
     CScript l_script;
 
     if (!s_val.empty()){
-        l_script.ParseSU((char *)s_val.c_str());
+        l_script.ParseSUFile((char *)s_val.c_str());
     }
 
     if (!j_val.empty()){
-    	l_script.ParseJSON((char *)j_val.c_str());
+    	l_script.ParseJSONFile((char *)j_val.c_str());
     }
 
     if (!o_val.empty()){
@@ -124,7 +125,7 @@ int main(int argc, char** argv){
     }
 
     if (xflag){
-    	l_script.PrintJSON();
+    	cout << l_script.PrintJSON();
     }
 
     return 0;

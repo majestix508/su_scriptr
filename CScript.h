@@ -22,8 +22,11 @@ public:
 
     ~CScript();
 
-    void ParseSU(char *filename);
-    void ParseJSON(char *filename);
+    void ParseSUFile(char *filename);
+    void ParseSU(char *buffer, long size);
+
+    void ParseJSONFile(char *filename);
+    void ParseJSON(char *jsonstring);
 	void Print();
 
     bool CheckChecksum();
@@ -32,7 +35,7 @@ public:
     void PrintChecksum();
     
     void WriteToFile(char* filename);
-    void PrintJSON();
+    string PrintJSON();
 
 	mnlp_script_header_t m_header;
 	

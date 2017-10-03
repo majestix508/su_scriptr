@@ -2,6 +2,15 @@
 
 This is a helper tool for the Science Scripts of the QB50 CubeSat
 
+
+## Installation
+
+libcgicc is required for the cgi. Install it on a Debian/Ubuntu like system with:
+
+```
+sudo apt-get install libcgicc-dev
+```
+
 ## Usage
 
 ```
