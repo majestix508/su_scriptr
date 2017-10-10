@@ -7,27 +7,209 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+<style>
+.su_header {
+    background-color: #D3D3D3;
+}
+
+.su_timetable {
+    background-color: #B0C4DE;
+}
+
+.su_sequence {
+    background-color: #FAF0E6
+}
+
+</style>
+
   </head>
   <body>
 
     <div class="container-fluid text-center">
-        <h1>Science Unit Script Generator</h1>
-        <br><br>
-		<h3>SU-Script Upload</h3>
-		  <div class="form-group">
-		  <form enctype = "multipart/form-data" action = "/cgi-bin/scriptr.cgi" method = "post">
-	         <p>File: <input class="form-control" type = "file" name = "sufile" /></p>
-	         <p><input class="btn btn-primary" type = "submit" value = "Upload" /></p>
-	      </form>
-	      </div>
+        <h1>Science Unit - Script Generator</h1>
+        <br>
+    </div>
 
-	    <h3>JSON-Script Upload</h3>
-		  <div class="form-group">
-		  <form enctype = "multipart/form-data" action = "/cgi-bin/scriptr.cgi" method = "post">
-	         <p>File: <input class="form-control" type = "file" name = "jsonfile" /></p>
-	         <p><input class="btn btn-primary" type = "submit" value = "Upload" /></p>
-	      </form>
-	      </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <h3>SU-Script Upload</h3>
+          <div class="form-group">
+            <form enctype = "multipart/form-data" action = "/cgi-bin/scriptr.cgi" method = "post">
+                 <p>File: <input class="form-control" type = "file" name = "sufile" /></p>
+                 <p><input class="btn btn-primary" type = "submit" value = "Upload SU-Script" /></p>
+              </form>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <h3>JSON-Script Upload</h3>
+          <div class="form-group">
+            <form enctype = "multipart/form-data" action = "/cgi-bin/scriptr.cgi" method = "post">
+               <p>File: <input class="form-control" type = "file" name = "jsonfile" /></p>
+               <p><input class="btn btn-primary" type = "submit" value = "Upload JSON-Script" /></p>
+            </form>
+          </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="container">
+        
+        <form>
+          <h3>Header</h3>
+              <div class="container su_header">
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="starttime">Starttime</label>
+                      <input type="text" class="form-control" name="starttime"><br>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label for="file_sn">file_sn</label>
+                      <input type="text" class="form-control" name="file_sn"><br>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label for="sw_ver">sw_ver</label>
+                      <input type="text" class="form-control" name="sw_ver"><br>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="script_type">script_type</label>
+                      <select class="form-control" name="script_type">
+                        <option value="00000">General</option>
+                        <option value="00001">Low power</option>
+                        <option value="00010">Stage #1 test (MNLP_SIM)</option>
+                        <option value="00010">Not used</option>
+                        <option value="00100">Stage #2 test (FM MNLP on-ground test)</option>
+                        <option value="00101-00111">Spare</option>
+                        <option value="01000">User defined #1 (for use by CubeSat team)</option>
+                        <option value="01001">User defined #2 (for use by CubeSat team)</option>
+                        <option value="01010">User defined #3 (for use by CubeSat team)</option>
+                        <option value="01011">User defined #4 (for use by CubeSat team)</option>
+                        <option value="01100">User defined #5 (for use by CubeSat team)</option>
+                        <option value="01101">User defined #6 (for use by CubeSat team)</option>
+                        <option value="01110">User defined #7 (for use by CubeSat team)</option>
+                        <option value="01111">User defined #8 (for use by CubeSat team)</option>
+                        <option value="10000">FM science script #1 (SU team defined)</option>
+                        <option value="10001">FM science script #2 (SU team defined)</option>
+                        <option value="10010">FM science script #3 (SU team defined)</option>
+                        <option value="10011">FM science script #4 (SU team defined)</option>
+                        <option value="10100">FM science script #5 (SU team defined)</option>
+                        <option value="10101">FM science script #6 (SU team defined)</option>
+                        <option value="10110">FM science script #7 (SU team defined)</option>
+                        <option value="10111">FM science script #8 (SU team defined)</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label for="su_id">su_id</label>
+                      <select class="form-control" name="su_id">
+                        <option value="00">reserved</option>
+                        <option value="01">INMS</option>
+                        <option value="10">MNLP</option>
+                        <option value="11">FIPEX</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                      <label for="su_md">su_md</label>
+                        <select class="form-control">
+                          <option value="00">Bread Board</option>
+                          <option value="01">EM: Engineering Model</option>
+                          <option value="10">QM: Qualification Model</option>
+                          <option value="11">FM: Flight Model</option>
+                        </select>
+                    </div>
+                  </div>
+              </div>
+          <br>
+          <h3>Timetable</h3>
+              
+               <div class="container su_timetable">
+                   <button type="button" class="btn btn-info">add Timetable Element</button>
+               </div>
+               <div class="container su_timetable">
+                  <div class="row">
+                      <div class="col-md-3 mb-3">
+                        <label for="tt_sec_1">time_seconds</label>
+                        <input type="text" class="form-control" name="tt_sec_1">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <label for="tt_min_1">time_minutes</label>
+                        <input type="text" class="form-control" name="tt_min_1">
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <label for="tt_hour_1">time_hours</label>
+                        <input type="text" class="form-control" name="tt_hour_1"><br>
+                      </div>
+                      <div class="col-md-2 mb-2">
+                        <label for="tt_script_index_1">script_index</label>
+                        <select class="form-control" name="tt_script_index_1">
+                            <option value="41">S1 script sequence</option>
+                            <option value="42">S2 script sequence</option>
+                            <option value="43">S3 script sequence</option>
+                            <option value="44">S4 script sequence</option>
+                            <option value="45">S5 script sequence</option>
+                            <option value="55">EOT end of Table</option>
+                        </select>
+                      </div>
+                      <div class="col-md-1 mb-1">
+                          <button type="button" class="btn btn-default">
+                            <span class="glyphicon glyphicon-remove">remove</span>
+                          </button>
+                      </div>
+                  </div>
+               </div>
+          <br>
+          <h3>Sequences</h3>
+
+               <div class="container su_sequence">
+                   <button type="button" class="btn btn-info">add Sequence Element</button>
+               </div>
+              <div class="container su_sequence">
+                <div class="row">
+                  <div class="col-md-4 mb-4">
+                    <label for="seq_delta_sec_1">delta_seconds</label>
+                    <input type="text" class="form-control" name="seq_delta_sec_1"><br>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <label for="seq_delta_min_1">delta_minutes</label>
+                    <input type="text" class="form-control" name="seq_delta_min_1"><br>
+                  </div>
+                  <div class="col-md-3 mb-3">
+                    <label for="seq_cmd_id_1">cmd_id</label>
+                    <input type="text" class="form-control" name="seq_cmd_id_1"><br>
+                  </div>
+                  <div class="col-md-1 mb-1">
+                    <button type="button" class="btn btn-default">
+                      <span class="glyphicon glyphicon-remove">remove</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="seq_len_1">len</label>
+                    <input type="text" class="form-control" name="seq_len_1"><br>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="seq_seq_cnt_1">seq_cnt</label>
+                    <input type="text" class="form-control" name="seq_seq_cnt_1"><br>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-12 mb-6">
+                    <label for="seq_params_1">params</label>
+                    <input tpye="text" class="form-control" name="seq_params_1"><br>
+                  </div>
+                </div>
+              </div>
+            
+            <br><br>
+            <div class="container-fluid text-center">
+              <button type="submit" class="btn btn-primary">Generate SU-script</button>
+              <button type="button" class="btn btn-primary">Validate Values</button>
+            </div>
+        </form>
+    
     </div>
 
     <!-- Optional JavaScript -->
